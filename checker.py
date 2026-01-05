@@ -4,7 +4,7 @@ import random
 import time
 from typing import Any, Dict, Optional, Tuple
 
-import requests
+from curl_cffi import requests
 from notify_telegram import send_telegram
 
 STATE_FILE = "state.json"
