@@ -1,0 +1,50 @@
+name: VFS Slot Checker
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run checker
+        env:
+          VFS_URL: ${{ secrets.VFS_URL }}
+          VFS_AUTHORIZE: ${{ secrets.VFS_AUTHORIZE }}
+          VFS_PAYLOAD_JSON: ${{ secrets.VFS_PAYLOAD_JSON }}
+          VFS_ORIGIN: ${{ secrets.VFS_ORIGIN }}
+          VFS_REFERER: ${{ secrets.VFS_REFERER }}
+          VFS_USER_AGENT: ${{ secrets.VFS_USER_AGENT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python checker.py
+
+      # Optional: commit state.json back so it persists between runs
+      # (Otherwise every run may behave like "first run" depending on how you rely on state.)
+      - name: Commit state
+        run: |
+          if [ -f state.json ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git add state.json
+            git diff --cached --quiet || git commit -m "Update state"
+            git push || true
+          fi
