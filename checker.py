@@ -72,7 +72,14 @@ def main() -> None:
     headers = build_headers()
 
     try:
-        r = requests.post(url, headers=headers, json=payload, timeout=25)
+        r = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=25,
+            impersonate="chrome"  # key line
+        )
+
     except Exception as e:
         print(f"Request failed: {e}")
         return
