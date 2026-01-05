@@ -24,24 +24,17 @@ def save_state(state: Dict[str, Any]) -> None:
         json.dump(state, f, indent=2, ensure_ascii=False)
 
 def build_headers() -> Dict[str, str]:
-    """
-    Keep headers minimal but sufficient.
-    Many VFS endpoints only need authorize + content-type + origin/referer.
-    """
     return {
         "accept": "application/json, text/plain, */*",
+        "accept-language": os.environ.get("VFS_ACCEPT_LANGUAGE", "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7"),
         "content-type": "application/json;charset=UTF-8",
-        "origin": os.environ.get("VFS_ORIGIN", "https://visa.vfsglobal.com"),
-        "referer": os.environ.get("VFS_REFERER", "https://visa.vfsglobal.com/"),
-        # IMPORTANT: VFS uses `authorize` (not standard `Authorization`) in your case.
+        "origin": "https://visa.vfsglobal.com",
+        "referer": "https://visa.vfsglobal.com/",
+        "user-agent": os.environ["VFS_USER_AGENT"],
         "authorize": os.environ["VFS_AUTHORIZE"],
-        # Optional user-agent (sometimes helps reduce blocking)
-        "user-agent": os.environ.get(
-            "VFS_USER_AGENT",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        ),
+        "cookie": os.environ["VFS_COOKIE"],
     }
+
 
 def parse_response(data: Any) -> Tuple[bool, Optional[str], Dict[str, Any]]:
     """
